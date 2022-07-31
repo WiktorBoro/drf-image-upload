@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import main.models_validators
+import main.custom_models
 
 
 class Migration(migrations.Migration):
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('account_tier', models.CharField(max_length=50, unique=True)),
                 ('link_to_the_originally_uploaded_file', models.BooleanField(default=False)),
                 ('ability_to_generate_expiring_links', models.BooleanField(default=False)),
-                ('image_height', models.CharField(default='', max_length=100, validators=[main.models_validators.validate_image_height])),
+                ('image_height', models.CharField(default='', max_length=100, validators=[main.custom_models.validate_image_height])),
             ],
         ),
         migrations.CreateModel(

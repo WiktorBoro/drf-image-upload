@@ -4,10 +4,11 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from . import views
 
-router = routers.DefaultRouter()
-router.register('users', views.UsersView)
-router.register('account_tiers', views.AccountTiersView)
-router.register('image_upload', views.ImageUpload)
+router = routers.DefaultRouter(trailing_slash=False)
+router.register('users', views.UsersView, 'users')
+router.register('account_tiers', views.AccountTiersView, 'account_tiers')
+router.register('image_upload', views.ImageUpload, 'image_upload')
+router.register('expires_images', views.ExpiresImages, 'expires_images')
 
 urlpatterns = [
     path('', include(router.urls)),
