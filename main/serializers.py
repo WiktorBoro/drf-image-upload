@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Users, AccountTiers, OriginalImages, ResizeImages
-from .resize_image import image_resizer, create_expires_image
+from .expires_and_resize_image import image_resizer, create_expires_image
 
 
 class UsersSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,30 +25,33 @@ class AccountTiersSerializer(serializers.HyperlinkedModelSerializer):
                   'image_height',)
 
 
+class UserImageSerializer(serializers.ModelSerializer):
+    resize_images_list = serializers.SerializerMethodField()
+
+    def get_resize_images_list(self, originalimages):
+        image = originalimages.resizeimages_set.all()
+        return ResizeImagesSerializer(instance=image,
+                                      many=True,
+                                      context={'request': self.context.get('request')}).data
+
+    class Meta:
+        model = OriginalImages
+        fields = ('user', 'image_name', 'image', 'width', 'height', 'resize_images_list')
+
+    def to_representation(self, obj):
+        # get the original representation
+        image_response = super(UserImageSerializer, self).to_representation(obj)
+        # remove 'image' field if mobile request
+        if not self.context.get('user').account_tier.link_to_the_originally_uploaded_file:
+            image_response.pop('image')
+
+        return image_response
+
+
 class ResizeImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResizeImages
         fields = ('width', 'height', 'resize_image')
-
-
-class ExpiresImagesSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(source='original_image.user.user_name',
-                                              queryset=Users.objects.all())
-    image_name = serializers.CharField()
-
-    class Meta:
-        model = ResizeImages
-        fields = ('user', 'image_name', 'expiring_time')
-
-    def create(self, validated_data):
-        user = Users.objects.get(user_name=validated_data['user'])
-        expiring_time = validated_data['expiring_time']
-        image = OriginalImages.objects.get(user=user, image_name=validated_data['image_name'])
-        expires_image = create_expires_image(original_image=image)
-
-        return ResizeImages.objects.create(original_image=image,
-                                           resize_image=expires_image,
-                                           expiring_time=expiring_time)
 
 
 class OriginalImagesSerializer(serializers.ModelSerializer):
@@ -70,3 +73,34 @@ class OriginalImagesSerializer(serializers.ModelSerializer):
             resize_image = image_resizer(image_to_resize=validated_data['image'], size=size)
             ResizeImages.objects.create(original_image=original_image, resize_image=resize_image)
         return original_image
+
+    def to_representation(self, obj):
+        # get the original representation
+        image_response = super(OriginalImagesSerializer, self).to_representation(obj)
+
+        image_response.pop('user')
+        # remove 'image' field if mobile request
+        if not Users.objects.get(pk=image_response['user']).account_tier.link_to_the_originally_uploaded_file:
+            image_response.pop('image')
+
+        return image_response
+
+
+class ExpiresImagesSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(source='original_image.user.user_name',
+                                              queryset=Users.objects.all())
+    image_name = serializers.CharField()
+
+    class Meta:
+        model = ResizeImages
+        fields = ('user', 'image_name', 'expiring_time')
+
+    def create(self, validated_data):
+        user = Users.objects.get(user_name=validated_data['user'])
+        expiring_time = validated_data['expiring_time']
+        image = OriginalImages.objects.get(user=user, image_name=validated_data['image_name'])
+        expires_image = create_expires_image(original_image=image)
+
+        return ResizeImages.objects.create(original_image=image,
+                                           resize_image=expires_image,
+                                           expiring_time=expiring_time)

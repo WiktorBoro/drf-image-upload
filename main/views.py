@@ -1,9 +1,13 @@
 from rest_framework import viewsets, status
-from rest_framework.views import APIView
-from .serializers import UsersSerializer, AccountTiersSerializer, OriginalImagesSerializer, ExpiresImagesSerializer
+from django.shortcuts import get_object_or_404
+from .serializers import UsersSerializer, \
+    AccountTiersSerializer, \
+    OriginalImagesSerializer, \
+    ExpiresImagesSerializer, \
+    UserImageSerializer
 from .models import Users, AccountTiers, OriginalImages
 from rest_framework.response import Response
-from .resize_image import del_expires_image
+from .expires_and_resize_image import del_expires_image
 
 
 class UsersView(viewsets.ModelViewSet):
@@ -19,19 +23,32 @@ class AccountTiersView(viewsets.ModelViewSet):
     lookup_field = 'account_tier_name__iexact'
 
 
+class UserImageView(viewsets.ViewSet):
+    lookup_field = 'user_name'
+
+    def list(self, request):
+        return Response('serializer.data')
+
+    def retrieve(self, request, user_name=None):
+        user = Users.objects.get(user_name=user_name)
+        queryset = OriginalImages.objects.filter(user=user)
+        # user = get_object_or_404(queryset, user=user)
+
+        serializer = UserImageSerializer(queryset, many=True, context={'request': request,
+                                                                       'user': user})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ImageUpload(viewsets.ViewSet):
     serializer_class = OriginalImagesSerializer
 
     def create(self, request):
-        # queryset = OriginalImages.objects.all()
         serializer_original_image = OriginalImagesSerializer(data=request.data, context={'request': request})
 
         if not serializer_original_image.is_valid():
             return Response(serializer_original_image.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer_original_image.save()
-
-        print(serializer_original_image.data)
 
         return Response(serializer_original_image.data, status=status.HTTP_201_CREATED)
 
@@ -45,7 +62,6 @@ class ExpiresImages(viewsets.ViewSet):
         if not expires_images_serializer.is_valid():
             return Response(expires_images_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        print(expires_images_serializer)
         expires_images_serializer.save()
         expiring_time = expires_images_serializer.data['expiring_time']
         resize_image = expires_images_serializer.data['resize_image']

@@ -35,11 +35,6 @@ class OriginalImages(models.Model):
 
     image = models.ImageField(upload_to=CreateName(), height_field='height', width_field='width')
 
-    expiring_time = models.SmallIntegerField(default=0,
-                                             validators=[
-                                                 MaxValueValidator(30000),
-                                                 MinValueValidator(300)
-                                             ])
     objects = models.Manager()
 
     def __str__(self):
