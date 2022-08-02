@@ -126,3 +126,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = "redis://:IoZE8NXahwraq2h2LnYWYZCUYJmGPVzf@redis-13684.c250.eu-central-1-1.ec2.cloud.redislabs.com:13684"
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

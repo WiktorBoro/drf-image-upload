@@ -29,11 +29,12 @@ def image_resizer(image_to_resize, size):
 
 def create_expires_image(original_image):
     image_to_binar = Image.open(original_image.image)
-    image = image_to_binar.convert('1')
-    img_to_save = BytesIO()
     img_format = image_to_binar.format
 
-    image.save(fp=img_to_save, format=image.format.lower(), quality=100)
+    image = image_to_binar.convert('1')
+    img_to_save = BytesIO()
+
+    image.save(fp=img_to_save, format=img_format.lower(), quality=100)
     # END pillow operation
 
     # Prepared the image to be saved in db and saved

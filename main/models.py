@@ -28,7 +28,7 @@ class Users(models.Model):
 
 class OriginalImages(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    image_name = models.CharField(max_length=50, unique=True)
+    image_name = models.CharField(max_length=50)
 
     width = models.SmallIntegerField(null=True)
     height = models.SmallIntegerField(null=True)
