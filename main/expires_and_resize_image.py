@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from celery import shared_task
 from time import sleep
 from .models import ResizeImages
+import os
 
 
 def image_resizer(image_to_resize, size):
@@ -43,9 +44,11 @@ def create_expires_image(original_image):
 
 
 @shared_task(bind=True)
-def del_expires_image(expiring_time: int,
+def del_expires_image(self,
+                      expiring_time: int,
                       image: object):
     sleep(expiring_time)
-    expiring_image = ResizeImages.objects.get(expiring_time=expiring_time, resize_image=image)
-    expiring_image.image.delete(save=True)
+    image_name = os.path.basename(image)
+    expiring_image = ResizeImages.objects.get(expiring_time=expiring_time, resize_image=image_name)
+    expiring_image.resize_image.delete(save=True)
     expiring_image.delete()

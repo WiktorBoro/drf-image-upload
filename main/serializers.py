@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Users, AccountTiers, OriginalImages, ResizeImages
 from .expires_and_resize_image import image_resizer, create_expires_image
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class AccountTiersSerializer(serializers.HyperlinkedModelSerializer):
@@ -66,6 +67,13 @@ class UploadImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = OriginalImages
         fields = ('user', 'image_name', 'image', 'resize_images_list')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=OriginalImages.objects.all(),
+                fields=['user', 'image_name'],
+                message="Image name must by unique"
+            )
+        ]
 
     def create(self, validated_data):
         original_image = OriginalImages.objects.create(**validated_data)
@@ -88,21 +96,48 @@ class UploadImagesSerializer(serializers.ModelSerializer):
         return image_response
 
 
-class ExpiresImagesSerializer(serializers.Serializer):
+class CheckUserHasImagePermissions(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field='user_name',
                                         queryset=Users.objects.all())
 
-    image_name = serializers.CharField()
+    def validate(self, value_to_valid):
+        if not value_to_valid['original_image'] in OriginalImages.objects.filter(user=value_to_valid['user']):
+            raise serializers.ValidationError("Image must belong to the user.")
 
-    expiring_time = serializers.IntegerField()
+        if not 300 <= value_to_valid['expiring_time'] <= 30000:
+            raise serializers.ValidationError("Expiring time must between 300 and 30000")
+
+        if not value_to_valid['user'].account_tier.ability_to_generate_expiring_links:
+            raise serializers.ValidationError("The user has an inadequate account level to perform this operation")
+
+        return value_to_valid
+
+    class Meta:
+        model = ResizeImages
+        fields = ('user', 'original_image', 'expiring_time')
+
+
+class ExpiresImagesSerializer(serializers.ModelSerializer):
+    resize_image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = ResizeImages
+        fields = ('original_image', 'expiring_time', 'resize_image')
 
     def create(self, validated_data):
-        # print(validated_data)
         expiring_time = validated_data['expiring_time']
-        image = OriginalImages.objects.get(user=validated_data['user'],
-                                           image_name=validated_data['image_name'])
-        expires_image = create_expires_image(original_image=image)
+        original_image = validated_data['original_image']
+        expires_image = create_expires_image(original_image=original_image)
 
-        return ResizeImages.objects.create(original_image=image,
+        return ResizeImages.objects.create(original_image=original_image,
                                            resize_image=expires_image,
                                            expiring_time=expiring_time)
+
+    def to_representation(self, obj):
+        # get the original representation
+        image_response = super(ExpiresImagesSerializer, self).to_representation(obj)
+
+        # remove 'image' field if mobile request
+        image_response.pop('original_image')
+
+        return image_response
