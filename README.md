@@ -65,11 +65,16 @@ Return example: `[{"user_name":"<str: user name>", "account_tier": "<str: accoun
 
 Create new user
 
-Body: `{"user_name": "<str: user name>", "account_tier": "<str: account tier name>"}`
-
+Body: 
+```
+{"user_name": "<str: user name>", "account_tier": "<str: account tier name>"}
+```
 Return dictionary with user_name and account tier key
 
-Return example:`{"user_name": "Test", "account_tier": "Basic"}`
+Return example:
+```
+{"user_name": "Test", "account_tier": "Basic"}
+```
 
 ### Method: GET
 Get a list of photos and sizes (available for the account level) for, a given user
@@ -78,7 +83,9 @@ Url: `/users/<str: user-name>`
 
 Return dictionary of dictionaries with the size of the images and a links to them
 
-Return example: `[
+Return example: 
+```
+[
     {
         "image_name": "<str: image name>",
         "width": <int: original image width>,
@@ -92,8 +99,10 @@ Return example: `[
             },
             ....
         ]
-    }
-]`
+    },
+    ....
+]
+```
 
 ## 2. Account tiers
 
@@ -105,13 +114,17 @@ Obtains a list of all existing account tiers with permissions and available imag
 
 Return a list of dictionary with all account tiers with permissions and available image
 
-Return example: `[
+Return example: 
+```
+[
     {
         "account_tier_name": "<str: account tier name>",
         "link_to_the_originally_uploaded_file": <boolean>,
         "ability_to_generate_expiring_links": <boolean>,
         "image_height": "<str: list in string with available image sizes>"
-    },....`
+    },....
+]
+```
 
 ### Method: GET
 
@@ -119,12 +132,15 @@ Url: `/account-tiers/<str: accoun tier name>`
 
 Returns the data of one level of the account
 
-Return example: `{
+Return example: 
+```
+{
         "account_tier_name": "<str: account tier name>",
         "link_to_the_originally_uploaded_file": <boolean>,
         "ability_to_generate_expiring_links": <boolean>,
         "image_height": "<str: list in string with available image sizes>"
-    }`
+    }
+```
 
 ## 3. Image upload
 
@@ -133,9 +149,14 @@ Url: `/image-upload`
 ### Method: POST
 Send a photo and give it a name for the chosen user
 
-Body: `{"user": "<str: user name>", "image_name": "<str: name the image>", "image": <object: image file>}`
+Body: 
+```
+{"user": "<str: user name>", "image_name": "<str: name the image>", "image": <object: image file>}
+```
 
-Return example: `{
+Return example: 
+```
+{
     "image_name": "<str: image name>",
     "link": <str: link to original image OPTIONAL if the account permissions are appropriate>,
     "resize_images_list": [
@@ -146,7 +167,8 @@ Return example: `{
             },
             ....
     ]
-}`
+}
+```
 
 ## 3. Generate expiring binary image
 
@@ -154,9 +176,19 @@ Url: `/expires-image`
 
 ### Method: POST
 
-Specify the username, image name, and the expiration time, if you have sufficient rights, the graphic will be generated which will expire after the specified time.
+Specify the username, image name, and the expiration time, if you have sufficient account tier, the graphic will be generated which will expire after the specified time.
 
 !Note the graphic must belong to the specified user
 
-Body: `{"user": "<str: user name>", "original_image": "<str: original image name>", "image": <object: image file>}`
+Body: 
+```
+{"user": "<str: user name>", "original_image": "<str: original image name>", "image": <object: image file>}
+```
 
+Return example: 
+```
+{
+    "expiring_time": <int: expiring time>,
+    "resize_image": "<str: link>"
+}
+```
