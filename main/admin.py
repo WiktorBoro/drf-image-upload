@@ -53,4 +53,3 @@ admin.site.register(AccountTiers, AccountTiersAdmin)
 admin.site.register(Users, UserAdmin)
 admin.site.register(OriginalImages, OriginalImagesAdmin)
 admin.site.register(ResizeImages)
-

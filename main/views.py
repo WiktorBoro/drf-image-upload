@@ -5,7 +5,7 @@ from .serializers import UsersSerializer, \
     UploadImagesSerializer, \
     ExpiresImagesSerializer, \
     UserImageSerializer, \
-    CheckUserHasImagePermissions
+    CheckUserHasImagePermissionsSerializer
 from .models import Users, AccountTiers, OriginalImages
 from rest_framework.response import Response
 from .expires_and_resize_image import del_expires_image
@@ -65,11 +65,11 @@ class ImageUpload(viewsets.ViewSet):
 
 
 class ExpiresImages(viewsets.ViewSet):
-    serializer_class = CheckUserHasImagePermissions
+    serializer_class = CheckUserHasImagePermissionsSerializer
 
     def create(self, request):
-        vaid_user_has_image = CheckUserHasImagePermissions(data=request.data)
-
+        vaid_user_has_image = CheckUserHasImagePermissionsSerializer(data=request.data,
+                                                                     context={'request': request})
         if not vaid_user_has_image.is_valid():
             return Response(vaid_user_has_image.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,5 +83,4 @@ class ExpiresImages(viewsets.ViewSet):
         expiring_time = expires_images_serializer.data['expiring_time']
         resize_image = expires_images_serializer.data['resize_image']
         del_expires_image.delay(expiring_time=expiring_time, image=resize_image)
-        # print(expires_images_serializer.data)
         return Response(expires_images_serializer.data, status=status.HTTP_201_CREATED)

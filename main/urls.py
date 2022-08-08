@@ -5,10 +5,10 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register('user_image_list', views.UserImageView, 'user_image_list')
-router.register('account_tiers', views.AccountTiersView, 'account_tiers')
-router.register('image_upload', views.ImageUpload, 'image_upload')
-router.register('expires_image', views.ExpiresImages, 'expires_image')
+router.register('users', views.UserImageView, basename='users image list')
+router.register('account-tiers', views.AccountTiersView, basename='account tiers')
+router.register('image-upload', views.ImageUpload, basename='image upload')
+router.register('expires-image', views.ExpiresImages, basename='expires image')
 
 urlpatterns = [
     path('', include(router.urls)),
