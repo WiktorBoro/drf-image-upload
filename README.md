@@ -59,21 +59,35 @@ Obtains a list of all existing users.
 
 Return a list of dictionary with all users with their account levels
 
-Return example: `[{"user_name":"<str: user name>", "account_tier": "<str: account tier name>"}, ....]`
-
+Return example: 
+```
+[
+    {
+        "user_name":"<str: user name>", 
+        "account_tier": "<str: account tier name>"
+    }, 
+....
+]`
+```
 ### Method: POST
 
 Create new user
 
 Body: 
 ```
-{"user_name": "<str: user name>", "account_tier": "<str: account tier name>"}
+{
+    "user_name": "<str: user name>", 
+    "account_tier": "<str: account tier name>"
+}
 ```
 Return dictionary with user_name and account tier key
 
 Return example:
 ```
-{"user_name": "Test", "account_tier": "Basic"}
+{
+    "user_name": "Test", 
+    "account_tier": "Basic"
+}
 ```
 
 ### Method: GET
@@ -122,7 +136,8 @@ Return example:
         "link_to_the_originally_uploaded_file": <boolean>,
         "ability_to_generate_expiring_links": <boolean>,
         "image_height": "<str: list in string with available image sizes>"
-    },....
+    },
+    ....
 ]
 ```
 
@@ -151,7 +166,11 @@ Send a photo and give it a name for the chosen user
 
 Body: 
 ```
-{"user": "<str: user name>", "image_name": "<str: name the image>", "image": <object: image file>}
+{
+    "user": "<str: user name>", 
+    "image_name": "<str: name the image>", 
+    "image": <object: image file>
+}
 ```
 
 Return example: 
@@ -182,7 +201,11 @@ Specify the username, image name, and the expiration time, if you have sufficien
 
 Body: 
 ```
-{"user": "<str: user name>", "original_image": "<str: original image name>", "image": <object: image file>}
+{   
+    "user": "<str: user name>", 
+    "original_image": "<str: original image name>", 
+    "image": <object: image file>
+}
 ```
 
 Return example: 
