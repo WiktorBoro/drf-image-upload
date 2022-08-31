@@ -9,9 +9,9 @@
 - Get a list of photos and sizes (available for the account level) for, a given user
 - Generate expiring binary image (if your account level allows it)
 
-#Heroku deploy
+# Heroku deploy
 
-Soon
+https://image-upload2.herokuapp.com
 
 # Quickstart
 
