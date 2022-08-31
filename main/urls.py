@@ -13,4 +13,5 @@ router.register('expires-image', views.ExpiresImages, basename='expires image')
 
 urlpatterns = [
     path('', include(router.urls)),
+    re_path(r'^images/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
